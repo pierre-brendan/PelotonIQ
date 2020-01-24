@@ -1,0 +1,180 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Cyclist_profile_data.ipynb",
+      "provenance": [],
+      "collapsed_sections": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "UKDEMxGW9tnw",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# import packages\n",
+        "from bs4 import BeautifulSoup\n",
+        "import requests\n",
+        "import pandas as pd\n",
+        "import re\n",
+        "\n",
+        "# start with non-looped method to get profiles\n",
+        "url = 'https://www.procyclingstats.com/rider/alejandro-valverde'\n",
+        "html = requests.get(url).text\n",
+        "soup = BeautifulSoup(html, 'html5lib')\n",
+        "\n",
+        "# GC method\n",
+        "spans = soup.find_all('li', {\"class\": \"gc\"})\n",
+        "gc = [span.get_text() for span in spans]\n",
+        "\n",
+        "# Classic\n",
+        "spans = soup.find_all('li', {\"class\": \"classic\"})\n",
+        "classic = [span.get_text() for span in spans]\n",
+        "\n",
+        "# Time trial\n",
+        "spans = soup.find_all('li', {\"class\": \"tt\"})\n",
+        "tt = [span.get_text() for span in spans]\n",
+        "\n",
+        "# Sprint\n",
+        "spans = soup.find_all('li', {\"class\": \"sprint\"})\n",
+        "sprint = [span.get_text() for span in spans]\n",
+        "\n",
+        "# Climber\n",
+        "spans = soup.find_all('li', {\"class\": \"climber\"})\n",
+        "climber = [span.get_text() for span in spans]\n",
+        "\n",
+        "# Rider\n",
+        "spans = soup.find_all('h1')\n",
+        "lines = [span.get_text() for span in spans]\n",
+        "rider2 = lines\n",
+        "rider2 = ''.join(rider2)\n",
+        "rider2 = re.sub(\"».*$\", \"\", rider2)\n",
+        "rider2 = re.sub(\"  \", \"\", rider2)\n",
+        "\n",
+        "# Team\n",
+        "team2 = lines\n",
+        "team2 = ''.join(team2)\n",
+        "team2 = re.sub('$.»*', '', team2)\n",
+        "team2 = team2.split('»')[1]\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "mOQvWK9c7N5b",
+        "colab_type": "text"
+      },
+      "source": [
+        "Looped version"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "mrS1EvX67JQx",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# import packages\n",
+        "from bs4 import BeautifulSoup\n",
+        "import requests\n",
+        "import pandas as pd\n",
+        "import re\n",
+        "\n",
+        "urls = ['https://www.procyclingstats.com/rider/alejandro-valverde', 'https://www.procyclingstats.com/rider/julian-alaphilippe']\n",
+        "appended_data = []\n",
+        "\n",
+        "for i in urls:\n",
+        "  print(i)\n",
+        "  # start with non-looped method to get profiles\n",
+        "  url = i\n",
+        "  html = requests.get(url).text\n",
+        "  soup = BeautifulSoup(html, 'html5lib')\n",
+        "\n",
+        "  # GC method\n",
+        "  spans = soup.find_all('li', {\"class\": \"gc\"})\n",
+        "  gc = [span.get_text() for span in spans]\n",
+        "\n",
+        "  # Classic\n",
+        "  spans = soup.find_all('li', {\"class\": \"classic\"})\n",
+        "  classic = [span.get_text() for span in spans]\n",
+        "\n",
+        "  # Time trial\n",
+        "  spans = soup.find_all('li', {\"class\": \"tt\"})\n",
+        "  tt = [span.get_text() for span in spans]\n",
+        "\n",
+        "  # Sprint\n",
+        "  spans = soup.find_all('li', {\"class\": \"sprint\"})\n",
+        "  sprint = [span.get_text() for span in spans]\n",
+        "\n",
+        "  # Climber\n",
+        "  spans = soup.find_all('li', {\"class\": \"climber\"})\n",
+        "  climber = [span.get_text() for span in spans]\n",
+        "\n",
+        "  # Rider\n",
+        "  spans = soup.find_all('h1')\n",
+        "  lines = [span.get_text() for span in spans]\n",
+        "  rider2 = lines\n",
+        "  rider2 = ''.join(rider2)\n",
+        "  rider2 = re.sub(\"».*$\", \"\", rider2)\n",
+        "  rider2 = re.sub(\"  \", \"\", rider2)\n",
+        "\n",
+        "  # Team\n",
+        "  team2 = lines\n",
+        "  team2 = ''.join(team2)\n",
+        "  team2 = re.sub('$.»*', '', team2)\n",
+        "  team2 = team2.split('»')[1]\n",
+        "\n",
+        "  data = pd.DataFrame(\n",
+        "    {'Rider': rider2,\n",
+        "     'Team': team2,\n",
+        "     'GC': gc,\n",
+        "     'TT': tt,\n",
+        "     'Sprint': sprint,\n",
+        "     'Climber': climber,\n",
+        "     'Classic': classic\n",
+        "    })\n",
+        "\n",
+        "  # store DataFrame in list\n",
+        "  appended_data.append(data)\n",
+        "\n",
+        "# see pd.concat documentation for more info\n",
+        "appended_data = pd.concat(appended_data)\n",
+        "\n",
+        "# Save the data file\n",
+        "appended_data.to_csv('rider_data.csv', index = False)\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ic6_GKvU8GPq",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "urls = ['https://www.procyclingstats.com/rider/alejandro-valverde', 'https://www.procyclingstats.com/rider/julian-alaphilippe']\n",
+        "for i in urls:\n",
+        "  print(i)\n",
+        "\n",
+        "print(appended_data)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    }
+  ]
+}
