@@ -1,3 +1,9 @@
+#File extensions #
+##################
+.venv
+.env
+.vscode
+
 # Compiled source #
 ###################
 *.com
